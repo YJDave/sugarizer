@@ -1,4 +1,4 @@
-define(["sugar-web/activity/activity", "sugar-web/env", "sugar-web/graphics/icon"], function (activity, env, icon) {
+define(["sugar-web/activity/activity", "sugar-web/env", "sugar-web/graphics/icon", "webL10n"], function (activity, env, icon, webL10n) {
 
 	// Manipulate the DOM only when it is ready.
 	requirejs(['domReady!'], function (doc) {
@@ -25,6 +25,11 @@ define(["sugar-web/activity/activity", "sugar-web/env", "sugar-web/graphics/icon
 
 			currentEnv = environment;
 		
+			// Set current language to Sugarizer
+			var defaultLanguage = (typeof chrome != 'undefined' && chrome.app && chrome.app.runtime) ? chrome.i18n.getUILanguage() : navigator.language;
+			var language = environment.user ? environment.user.language : defaultLanguage;
+			webL10n.language.code = language;
+
 			// Load from datastore
 			console.log(environment.objectId)
 			if (!environment.objectId) {
@@ -44,8 +49,6 @@ define(["sugar-web/activity/activity", "sugar-web/env", "sugar-web/graphics/icon
 				});
 			}
 
-			document.getElementById("user").innerHTML = "<h1>"+"Hello"+" "+environment.user.name+
-						   " Welcome to Pawn Activity!</h1>";
 		});
 
 		// Handle event: click on button add
@@ -54,7 +57,7 @@ define(["sugar-web/activity/activity", "sugar-web/env", "sugar-web/graphics/icon
 			pawns.push(currentEnv.user.colorvalue);
 			drawPawns();
 
-			document.getElementById("user").innerHTML = "<h1>"+currentEnv.user.name+" played !</h1>";
+			document.getElementById("user").innerHTML = "<h1>"+webL10n.get("Played", {name:currentEnv.user.name})+"</h1>";
 		});
 
 		// Save in Journal on Stop
@@ -72,6 +75,12 @@ define(["sugar-web/activity/activity", "sugar-web/env", "sugar-web/graphics/icon
 					console.log("Failed to store data");
 				}
 			});
+		});
+
+		// Process localize event
+		window.addEventListener("localized", function() {
+			document.getElementById("user").innerHTML = "<h1>"+webL10n.get("Hello", {name:currentEnv.user.name})+"</h1>";
+			document.getElementById("add-button").title = webL10n.get("AddPawn");
 		});
 
 	});
